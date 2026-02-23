@@ -1,6 +1,6 @@
 # Crime Data Analysis & Perpetrator Identity Prediction
 
-> **Bachelor's Project** — Sri Ramakrishna College of Arts & Science, Coimbatore (2025)  
+> **Bachelor's Final Year Project** — Sri Ramakrishna College of Arts & Science, Coimbatore (2025)  
 > Submitted by: Maniarasan J (22127028)  
 > Guide: Mr. R. Janarthanan MCA., M.Phil., (Ph.D)
 
@@ -234,7 +234,7 @@ curl -X POST http://127.0.0.1:5000/api/predict \
 
 ---
 
-## Future Enhancements (per documentation)
+## Future Enhancements
 
 - Real-time data integration (IoT / live crime feeds)
 - Behavioural / psychological profiling models
