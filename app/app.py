@@ -14,16 +14,6 @@ import sys
 import os
 from pathlib import Path
 
-from flask import send_from_directory
-
-@app.route('/favicon.ico')
-def favicon():
-    return send_from_directory(
-        os.path.join(app.root_path, 'static'),
-        'favicon.ico',
-        mimetype='image/vnd.microsoft.icon'
-    )
-  
 # Allow imports from project root
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -37,17 +27,34 @@ from utils.helpers import (
     build_feature_row, decode_value, read_metrics
 )
 
-# ── Flask setup ────────────────────────────────────────────────────────────────
+# ───────────────────────────────────────────────────────────────────────────────
+# Flask setup
+# ───────────────────────────────────────────────────────────────────────────────
 app = Flask(__name__, template_folder="templates", static_folder="static")
 
-# ── Lazy-load models once ──────────────────────────────────────────────────────
-_encoders          = None
-_age_bundle        = None
-_gender_bundle     = None
-_rel_bundle        = None
 
+# ───────────────────────────────────────────────────────────────────────────────
+# Favicon route (must be AFTER app = Flask)
+# ───────────────────────────────────────────────────────────────────────────────
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(
+        os.path.join(app.root_path, 'static'),
+        'favicon.ico',
+        mimetype='image/vnd.microsoft.icon'
+    )
+
+
+# ───────────────────────────────────────────────────────────────────────────────
+# Lazy-load models once
+# ───────────────────────────────────────────────────────────────────────────────
+_encoders      = None
+_age_bundle    = None
+_gender_bundle = None
+_rel_bundle    = None
 
 def get_resources():
+    """Load models & encoders only once (much faster)."""
     global _encoders, _age_bundle, _gender_bundle, _rel_bundle
     if _encoders is None:
         _encoders      = load_encoders()
@@ -57,7 +64,9 @@ def get_resources():
     return _encoders, _age_bundle, _gender_bundle, _rel_bundle
 
 
-# ── Static dropdown options ────────────────────────────────────────────────────
+# ───────────────────────────────────────────────────────────────────────────────
+# Static dropdown options
+# ───────────────────────────────────────────────────────────────────────────────
 STATES = [
     "Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut",
     "Delaware","Florida","Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa",
@@ -66,7 +75,8 @@ STATES = [
     "New Hampshire","New Jersey","New Mexico","New York","North Carolina",
     "North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island",
     "South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont",
-    "Virginia","Washington","West Virginia","Wisconsin","Wyoming","District of Columbia",
+    "Virginia","Washington","West Virginia","Wisconsin","Wyoming",
+    "District of Columbia",
 ]
 MONTHS = [
     "January","February","March","April","May","June",
@@ -83,7 +93,9 @@ WEAPONS = [
 YEARS = list(range(1980, 2015))
 
 
-# ── Routes ─────────────────────────────────────────────────────────────────────
+# ───────────────────────────────────────────────────────────────────────────────
+# Routes
+# ───────────────────────────────────────────────────────────────────────────────
 
 @app.route("/")
 def home():
@@ -112,31 +124,28 @@ def predict():
         try:
             enc, age_b, gen_b, rel_b = get_resources()
 
-            # ── collect form inputs ──────────────────────────────────────────
-            state       = request.form.get("state", "Unknown")
-            year        = int(request.form.get("year", 2000))
-            month       = request.form.get("month", "January")
-            crime_type  = request.form.get("crime_type", "Murder or Manslaughter")
-            crime_solved= request.form.get("crime_solved", "Yes")
-            victim_sex  = request.form.get("victim_sex", "Unknown")
-            victim_age  = int(request.form.get("victim_age", 30))
-            victim_count= int(request.form.get("victim_count", 1))
-            weapon      = request.form.get("weapon", "Unknown")
+            # Collect form inputs
+            state        = request.form.get("state", "Unknown")
+            year         = int(request.form.get("year", 2000))
+            month        = request.form.get("month", "January")
+            crime_type   = request.form.get("crime_type", "Murder or Manslaughter")
+            crime_solved = request.form.get("crime_solved", "Yes")
+            victim_sex   = request.form.get("victim_sex", "Unknown")
+            victim_age   = int(request.form.get("victim_age", 30))
+            victim_count = int(request.form.get("victim_count", 1))
+            weapon       = request.form.get("weapon", "Unknown")
 
-            # ── Age prediction ───────────────────────────────────────────────
-            age_feat_names = age_b["feature_names"]
-            # exclude perpetrator-related columns if they snuck in
+            # AGE PREDICTION
             age_row = build_feature_row(
-                enc, age_feat_names,
+                enc, age_b["feature_names"],
                 state, year, month, crime_type, crime_solved,
                 victim_sex, victim_age, victim_count, weapon
             )
             pred_age = int(round(age_b["model"].predict(age_row)[0]))
 
-            # ── Gender prediction ────────────────────────────────────────────
-            gen_feat_names = gen_b["feature_names"]
+            # GENDER PREDICTION
             gen_row = build_feature_row(
-                enc, gen_feat_names,
+                enc, gen_b["feature_names"],
                 state, year, month, crime_type, crime_solved,
                 victim_sex, victim_age, victim_count, weapon
             )
@@ -144,10 +153,9 @@ def predict():
             pred_gen_code = int(gen_b["model"].predict(gen_row_sc)[0])
             pred_gender   = decode_value(enc, "Perpetrator Sex", pred_gen_code)
 
-            # ── Relationship prediction ──────────────────────────────────────
-            rel_feat_names = rel_b["feature_names"]
+            # RELATIONSHIP PREDICTION
             rel_row = build_feature_row(
-                enc, rel_feat_names,
+                enc, rel_b["feature_names"],
                 state, year, month, crime_type, crime_solved,
                 victim_sex, victim_age, victim_count, weapon
             )
@@ -178,36 +186,24 @@ def metrics():
     return render_template("metrics.html", metrics=data)
 
 
-# ── JSON REST API ──────────────────────────────────────────────────────────────
+# ───────────────────────────────────────────────────────────────────────────────
+# REST API
+# ───────────────────────────────────────────────────────────────────────────────
 
 @app.route("/api/predict", methods=["POST"])
 def api_predict():
-    """
-    Accepts JSON:
-    {
-      "state": "California",
-      "year": 2005,
-      "month": "June",
-      "crime_type": "Murder or Manslaughter",
-      "crime_solved": "Yes",
-      "victim_sex": "Female",
-      "victim_age": 34,
-      "victim_count": 1,
-      "weapon": "Handgun"
-    }
-    Returns JSON with age_prediction, gender_prediction, relationship_prediction.
-    """
     try:
-        data         = request.get_json(force=True)
-        state        = data.get("state",        "Unknown")
-        year         = int(data.get("year",     2000))
-        month        = data.get("month",        "January")
-        crime_type   = data.get("crime_type",   "Murder or Manslaughter")
+        data = request.get_json(force=True)
+
+        state        = data.get("state", "Unknown")
+        year         = int(data.get("year", 2000))
+        month        = data.get("month", "January")
+        crime_type   = data.get("crime_type", "Murder or Manslaughter")
         crime_solved = data.get("crime_solved", "Yes")
-        victim_sex   = data.get("victim_sex",   "Unknown")
+        victim_sex   = data.get("victim_sex", "Unknown")
         victim_age   = int(data.get("victim_age", 30))
         victim_count = int(data.get("victim_count", 1))
-        weapon       = data.get("weapon",       "Unknown")
+        weapon       = data.get("weapon", "Unknown")
 
         enc, age_b, gen_b, rel_b = get_resources()
 
@@ -220,14 +216,18 @@ def api_predict():
                                        state, year, month, crime_type, crime_solved,
                                        victim_sex, victim_age, victim_count, weapon)
         gen_row_sc = gen_b["scaler"].transform(gen_row)
-        pred_gender = decode_value(enc, "Perpetrator Sex",
-                                   int(gen_b["model"].predict(gen_row_sc)[0]))
+        pred_gender = decode_value(
+            enc, "Perpetrator Sex",
+            int(gen_b["model"].predict(gen_row_sc)[0])
+        )
 
         rel_row    = build_feature_row(enc, rel_b["feature_names"],
                                        state, year, month, crime_type, crime_solved,
                                        victim_sex, victim_age, victim_count, weapon)
-        pred_rel   = decode_value(enc, "Relationship",
-                                  int(rel_b["model"].predict(rel_row)[0]))
+        pred_rel   = decode_value(
+            enc, "Relationship",
+            int(rel_b["model"].predict(rel_row)[0])
+        )
 
         return jsonify({
             "age_prediction":          pred_age,
@@ -239,7 +239,9 @@ def api_predict():
         return jsonify({"error": str(exc)}), 400
 
 
-# ── entry point ────────────────────────────────────────────────────────────────
+# ───────────────────────────────────────────────────────────────────────────────
+# Entry point (local dev only)
+# ───────────────────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
     print("[app] Starting Flask server on http://127.0.0.1:5000")
