@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block title %}Model Metrics | Crime Analysis{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+  <h2 class="fw-bold mb-1">
+    <i class="bi bi-graph-up-arrow text-success"></i> Model Performance Metrics
+  </h2>
+  <p class="text-muted mb-4">Evaluation results on a held-out 20% test set.</p>
+
+  {% if not metrics %}
+  <div class="alert alert-warning">
+    <i class="bi bi-exclamation-triangle"></i>
+    No metrics found. Please run the full pipeline first:
+    <code>python run_pipeline.py</code>
+  </div>
+  {% endif %}
+
+  <!-- Age model -->
+  {% if metrics.age %}
+  <div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+      <i class="bi bi-person-lines-fill"></i>
+      Model 1 — Age Prediction (Random Forest Regressor)
+    </div>
+    <div class="card-body">
+      <div class="row g-3 text-center">
+        {% for k, v in metrics.age.items() %}
+        <div class="col-6 col-md-3">
+          <div class="border rounded p-3">
+            <div class="fw-bold text-primary" style="font-size:1.4rem;">{{ v }}</div>
+            <div class="text-muted small">{{ k }}</div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Gender model -->
+  {% if metrics.gender %}
+  <div class="card mb-4">
+    <div class="card-header" style="background:#6a4c93; color:white;">
+      <i class="bi bi-gender-ambiguous"></i>
+      Model 2 — Gender Classification (MLP Classifier)
+    </div>
+    <div class="card-body">
+      <div class="row g-3 text-center">
+        {% for k, v in metrics.gender.items() %}
+        <div class="col-6 col-md-3">
+          <div class="border rounded p-3">
+            <div class="fw-bold text-success" style="font-size:1.4rem;">{{ v }}{% if 'Score' in k or 'Accuracy' in k or 'Recall' in k or 'Precision' in k %}%{% endif %}</div>
+            <div class="text-muted small">{{ k }}</div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Relationship model -->
+  {% if metrics.relationship %}
+  <div class="card mb-4">
+    <div class="card-header bg-danger text-white">
+      <i class="bi bi-people-fill"></i>
+      Model 3 — Relationship Prediction (XGBoost Classifier)
+    </div>
+    <div class="card-body">
+      <div class="row g-3 text-center">
+        {% for k, v in metrics.relationship.items() %}
+        <div class="col-6 col-md-3">
+          <div class="border rounded p-3">
+            <div class="fw-bold text-danger" style="font-size:1.4rem;">{{ v }}{% if 'Score' in k or 'Accuracy' in k or 'Recall' in k or 'Precision' in k %}%{% endif %}</div>
+            <div class="text-muted small">{{ k }}</div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Algorithm Summary table -->
+  <div class="card">
+    <div class="card-header"><i class="bi bi-table"></i> Algorithm Summary</div>
+    <div class="card-body">
+      <table class="table table-bordered table-hover">
+        <thead class="table-dark">
+          <tr>
+            <th>Task</th><th>Algorithm</th><th>Target Column</th><th>Type</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Age Prediction</td>
+            <td>Random Forest Regressor</td>
+            <td>Perpetrator Age</td>
+            <td><span class="badge bg-primary">Regression</span></td>
+          </tr>
+          <tr>
+            <td>Gender Classification</td>
+            <td>Multi-Layer Perceptron (MLP)</td>
+            <td>Perpetrator Sex</td>
+            <td><span class="badge bg-secondary">Classification</span></td>
+          </tr>
+          <tr>
+            <td>Relationship Prediction</td>
+            <td>XGBoost Classifier</td>
+            <td>Relationship</td>
+            <td><span class="badge bg-danger">Multi-class</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

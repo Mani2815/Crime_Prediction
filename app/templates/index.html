@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}Home | Crime Data Analysis{% endblock %}
+
+{% block content %}
+
+<!-- Hero -->
+<section class="hero text-center">
+  <div class="container">
+    <i class="bi bi-search" style="font-size:3rem; color:#e84855;"></i>
+    <h1 class="mt-3">Crime Data Analysis &amp;<br>Prediction of Perpetrator Identity</h1>
+    <p class="mt-3 mx-auto" style="max-width:680px;">
+      An end-to-end machine learning system that analyses historical homicide records
+      (1980–2014) and predicts key perpetrator attributes — age, gender, and relationship
+      to the victim — using Random Forest, MLP, and XGBoost models.
+    </p>
+    <div class="mt-4">
+      <a href="/predict" class="btn btn-primary btn-lg me-3">
+        <i class="bi bi-cpu"></i> Run Prediction
+      </a>
+      <a href="/analysis" class="btn btn-outline-light btn-lg">
+        <i class="bi bi-bar-chart-line"></i> View Analysis
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Feature cards -->
+<section class="container my-5">
+  <div class="row g-4">
+
+    <div class="col-md-4">
+      <div class="card h-100 p-3">
+        <div class="text-center text-primary mb-3" style="font-size:2.5rem;">
+          <i class="bi bi-database-check"></i>
+        </div>
+        <h5 class="text-center fw-bold">Crime Data Analysis</h5>
+        <p class="text-muted text-center">
+          Exploratory analysis of 638K+ homicide records — crime trends, weapon usage,
+          geographic hotspots, and seasonal patterns.
+        </p>
+        <div class="text-center mt-auto">
+          <a href="/analysis" class="btn btn-sm btn-outline-secondary">View Charts</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card h-100 p-3">
+        <div class="text-center text-danger mb-3" style="font-size:2.5rem;">
+          <i class="bi bi-person-bounding-box"></i>
+        </div>
+        <h5 class="text-center fw-bold">Perpetrator Prediction</h5>
+        <p class="text-muted text-center">
+          Three ML models predict the perpetrator's <strong>age</strong>,
+          <strong>gender</strong>, and <strong>relationship</strong> to the victim
+          from crime scene inputs.
+        </p>
+        <div class="text-center mt-auto">
+          <a href="/predict" class="btn btn-sm btn-outline-danger">Try It</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card h-100 p-3">
+        <div class="text-center text-success mb-3" style="font-size:2.5rem;">
+          <i class="bi bi-graph-up-arrow"></i>
+        </div>
+        <h5 class="text-center fw-bold">Model Performance</h5>
+        <p class="text-muted text-center">
+          Detailed accuracy, precision, recall, and error metrics for each trained model,
+          evaluated on a held-out 20% test split.
+        </p>
+        <div class="text-center mt-auto">
+          <a href="/metrics" class="btn btn-sm btn-outline-success">See Metrics</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- Dataset summary -->
+<section class="container mb-5">
+  <div class="card">
+    <div class="card-header"><i class="bi bi-info-circle"></i> Dataset Summary</div>
+    <div class="card-body">
+      <div class="row text-center">
+        <div class="col-6 col-md-3 mb-3">
+          <div class="display-6 fw-bold text-primary">638K+</div>
+          <div class="text-muted small">Total Records</div>
+        </div>
+        <div class="col-6 col-md-3 mb-3">
+          <div class="display-6 fw-bold text-danger">35</div>
+          <div class="text-muted small">Years (1980–2014)</div>
+        </div>
+        <div class="col-6 col-md-3 mb-3">
+          <div class="display-6 fw-bold text-success">50</div>
+          <div class="text-muted small">US States</div>
+        </div>
+        <div class="col-6 col-md-3 mb-3">
+          <div class="display-6 fw-bold text-warning">3</div>
+          <div class="text-muted small">ML Models</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
