@@ -6,6 +6,7 @@ Shared helper functions used by the Flask application and training scripts.
 
 import numpy as np
 import pandas as pd
+import gzip
 import joblib
 from pathlib import Path
 
@@ -54,10 +55,11 @@ def decode_value(encoders: dict, col: str, code: int) -> str:
 # ── model loaders ──────────────────────────────────────────────────────────────
 
 def load_age_model():
-    path = MODELS_DIR / "age_prediction.pkl"
+    path = MODELS_DIR / "age_prediction.pkl.gz"
     if not path.exists():
         raise FileNotFoundError(f"Age model not found at {path}.")
-    return joblib.load(path)
+    with gzip.open(path, "rb") as f:
+        return joblib.load(f)
 
 
 def load_gender_model():
