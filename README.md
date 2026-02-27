@@ -94,7 +94,7 @@ python run_pipeline.py
 This single command:
 1. Preprocesses & encodes the raw dataset → `data/processed/crime_cleaned.csv`
 2. Generates all EDA charts → `reports/figures/`
-3. Trains the Random Forest age model → `models/age_prediction.pkl`
+3. Trains the Random Forest age model → `models/age_prediction.pkl.gz`
 4. Trains the MLP gender model → `models/mlp_gender_model.pkl`
 5. Trains the XGBoost relationship model → `models/xgboost_relationship_model.pkl`
 
@@ -105,7 +105,7 @@ Expected runtime: **~10–20 minutes** depending on hardware.
 ```bash
 python src/preprocess.py              # Step 1: preprocess
 python src/analysis.py                # Step 2: EDA charts
-python src/train_age_model.py         # Step 3: age model
+python src/train_age_model.py.gz        # Step 3: age model
 python src/train_gender_model.py      # Step 4: gender model
 python src/train_relationship_model.py # Step 5: relationship model
 ```
